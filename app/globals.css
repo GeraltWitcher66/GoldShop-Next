@@ -1,0 +1,136 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: #0a0a0b;
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: rgba(201, 162, 39, 0.3);
+    color: #f4e9d4;
+  }
+
+  :focus-visible {
+    outline: 2px solid rgba(201, 162, 39, 0.85);
+    outline-offset: 3px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0a0a0b;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #26262b;
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #c9a227;
+  }
+}
+
+@layer components {
+  /* نوار شیشه‌ای هدر */
+  .glass {
+    background-color: rgba(10, 10, 11, 0.55);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    backdrop-filter: blur(18px) saturate(150%);
+    border-bottom: 1px solid rgba(244, 233, 212, 0.08);
+  }
+
+  /* متن با گرادیان طلا */
+  .gold-text {
+    background-image: linear-gradient(
+      100deg,
+      #8c6d15 0%,
+      #e8cf8b 30%,
+      #c9a227 55%,
+      #f6ecd8 78%,
+      #c9a227 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .btn-gold {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 1rem 2.1rem;
+    border-radius: 999px;
+    background-image: linear-gradient(120deg, #8c6d15, #e8cf8b 35%, #c9a227 68%, #f6ecd8);
+    background-size: 160% 100%;
+    color: #0a0a0b;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    box-shadow: 0 12px 34px -14px rgba(201, 162, 39, 0.8);
+    transition: background-position 0.5s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .btn-gold:hover {
+    background-position: 100% 0;
+    transform: translateY(-2px);
+    box-shadow: 0 20px 44px -16px rgba(201, 162, 39, 0.85);
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 1rem 2.1rem;
+    border-radius: 999px;
+    border: 1px solid rgba(244, 233, 212, 0.22);
+    color: #f4e9d4;
+    font-size: 0.9rem;
+    font-weight: 500;
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    transition: border-color 0.3s ease, background-color 0.3s ease, transform 0.3s ease;
+  }
+  .btn-ghost:hover {
+    border-color: rgba(201, 162, 39, 0.6);
+    background-color: rgba(244, 233, 212, 0.06);
+    transform: translateY(-2px);
+  }
+
+  .hairline {
+    height: 1px;
+    width: 100%;
+    background-image: linear-gradient(to left, rgba(201, 162, 39, 0.55), rgba(201, 162, 39, 0));
+  }
+
+  /* بافت پس‌زمینه ظریف برای بخش‌های تیره */
+  .luxe-grid {
+    background-image: linear-gradient(rgba(244, 233, 212, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(244, 233, 212, 0.035) 1px, transparent 1px);
+    background-size: 72px 72px;
+    -webkit-mask-image: radial-gradient(ellipse at center, #000 10%, transparent 72%);
+    mask-image: radial-gradient(ellipse at center, #000 10%, transparent 72%);
+  }
+}
+
+/* مخفی کردن اسکرول‌بار اسلایدرهای افقی */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
