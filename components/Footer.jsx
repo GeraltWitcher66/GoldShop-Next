@@ -8,8 +8,11 @@ const MAPS_URL = `https://maps.google.com/?q=${encodeURIComponent(
 
 const QUICK_LINKS = [
   { label: 'خانه', href: '/#home' },
-  { label: 'کالکشن', href: '/#collection' },
+  { label: 'کالکشن', href: '/collections/' },
   { label: 'درباره ما', href: '/#about' },
+  { label: 'علاقه‌مندی‌ها', href: '/wishlist/' },
+  { label: 'راهنمای خرید و سایز', href: '/guides/' },
+  { label: 'محاسبه‌گر قیمت طلا', href: '/gold-calculator/' },
   { label: 'تماس با ما', href: '/#contact' },
 ];
 

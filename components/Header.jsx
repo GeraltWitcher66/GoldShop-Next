@@ -1,10 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 
 import GoldPriceBar from '@/components/GoldPriceBar';
 import { useCart } from '@/context/CartContext';
+import { useWishlist } from '@/context/WishlistContext';
 import { toFaDigits } from '@/lib/format';
 
 const NAV_LINKS = [
@@ -15,9 +17,14 @@ const NAV_LINKS = [
 ];
 
 export default function Header() {
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const searchInputRef = useRef(null);
   const { count, openCart } = useCart();
+  const { count: wishlistCount } = useWishlist();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -25,6 +32,26 @@ export default function Header() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    if (!searchOpen) return undefined;
+    searchInputRef.current?.focus();
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') setSearchOpen(false);
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [searchOpen]);
+
+  function handleSearch(event) {
+    event.preventDefault();
+    const value = query.trim();
+    router.push(value ? `/collections/?q=${encodeURIComponent(value)}` : '/collections/');
+    setSearchOpen(false);
+    setMenuOpen(false);
+  }
 
   return (
     <header className="fixed inset-x-0 top-0 z-50">
@@ -74,10 +101,38 @@ export default function Header() {
 
           {/* سبد خرید + منوی موبایل: چسبیده به چپ */}
           <div className="col-start-3 flex items-center gap-2 justify-self-end">
+            <button
+              type="button"
+              onClick={() => setSearchOpen((open) => !open)}
+              aria-label={searchOpen ? 'بستن جستجو' : 'جستجو'}
+              aria-expanded={searchOpen}
+              className="grid h-10 w-10 place-items-center rounded-full border border-white/10 text-champagne/70 transition hover:border-gold/50 hover:text-gold"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-5 w-5" aria-hidden="true">
+                <circle cx="10.8" cy="10.8" r="6.3" />
+                <path d="m15.6 15.6 4.2 4.2" strokeLinecap="round" />
+              </svg>
+            </button>
+
+            <Link
+              href="/wishlist/"
+              aria-label={`علاقه‌مندی‌ها (${toFaDigits(wishlistCount)} قطعه)`}
+              className="relative hidden h-10 w-10 place-items-center rounded-full border border-white/10 text-champagne/70 transition hover:border-gold/50 hover:text-gold md:grid"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-5 w-5" aria-hidden="true">
+                <path d="M12 20.3 4.8 13a4.8 4.8 0 0 1 6.8-6.8l.4.4.4-.4a4.8 4.8 0 1 1 6.8 6.8L12 20.3Z" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              {wishlistCount > 0 ? (
+                <span className="absolute -end-1 -top-1 grid h-4 min-w-[1rem] place-items-center rounded-full bg-gold px-1 text-[9px] font-bold leading-none text-ink">
+                  {toFaDigits(wishlistCount)}
+                </span>
+              ) : null}
+            </Link>
+
             <Link
               href="/login"
               aria-label="ورود یا ثبت‌نام"
-              className="grid h-10 w-10 place-items-center rounded-full border border-white/10 text-champagne/70 transition hover:border-gold/50 hover:text-gold"
+              className="hidden h-10 w-10 place-items-center rounded-full border border-white/10 text-champagne/70 transition hover:border-gold/50 hover:text-gold sm:grid"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -132,10 +187,37 @@ export default function Header() {
         </div>
       </div>
 
+      {searchOpen ? (
+        <div className="border-b border-gold/15 bg-ink/95 backdrop-blur-xl">
+          <form
+            onSubmit={handleSearch}
+            role="search"
+            className="mx-auto flex max-w-7xl items-center gap-2 px-5 py-3 sm:px-8"
+          >
+            <label htmlFor="site-search" className="sr-only">
+              جستجو در کالکشن
+            </label>
+            <input
+              ref={searchInputRef}
+              id="site-search"
+              name="q"
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="نام قطعه، سنگ یا دسته‌بندی…"
+              className="h-10 min-w-0 flex-1 rounded-full border border-white/10 bg-white/[0.03] px-4 text-xs text-champagne transition placeholder:text-champagne/25 focus:border-gold/60 focus:outline-none"
+            />
+            <button type="submit" className="h-10 shrink-0 rounded-full bg-gold px-5 text-xs font-semibold text-ink transition hover:bg-gold-light">
+              جستجو
+            </button>
+          </form>
+        </div>
+      ) : null}
+
       {/* منوی موبایل */}
       <div
         className={`overflow-hidden transition-all duration-500 md:hidden ${
-          menuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+          menuOpen ? 'max-h-[36rem] opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
         <nav className="mx-5 mb-3 mt-2 flex flex-col gap-1 rounded-2xl border border-white/10 bg-ink-soft/95 p-3 shadow-2xl">
@@ -149,6 +231,38 @@ export default function Header() {
               {link.label}
             </Link>
           ))}
+
+          <div className="mt-1 border-t border-white/10 pt-2">
+            <Link
+              href="/wishlist/"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm text-champagne/75 transition hover:bg-white/5 hover:text-gold"
+            >
+              علاقه‌مندی‌ها
+              <span className="text-[10px] text-gold/70">{toFaDigits(wishlistCount)}</span>
+            </Link>
+            <Link
+              href="/guides/"
+              onClick={() => setMenuOpen(false)}
+              className="block rounded-xl px-3 py-2.5 text-sm text-champagne/75 transition hover:bg-white/5 hover:text-gold"
+            >
+              راهنمای خرید و سایز
+            </Link>
+            <Link
+              href="/gold-calculator/"
+              onClick={() => setMenuOpen(false)}
+              className="block rounded-xl px-3 py-2.5 text-sm text-champagne/75 transition hover:bg-white/5 hover:text-gold"
+            >
+              محاسبه‌گر قیمت طلا
+            </Link>
+            <Link
+              href="/login"
+              onClick={() => setMenuOpen(false)}
+              className="block rounded-xl px-3 py-2.5 text-sm text-champagne/75 transition hover:bg-white/5 hover:text-gold"
+            >
+              ورود / حساب کاربری
+            </Link>
+          </div>
         </nav>
       </div>
     </header>

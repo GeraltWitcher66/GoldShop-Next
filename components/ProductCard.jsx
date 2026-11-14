@@ -1,20 +1,24 @@
 import Link from 'next/link';
 
 import ProductImage from '@/components/ProductImage';
+import WishlistButton from '@/components/WishlistButton';
+import { isMadeToOrder } from '@/data/productOptions';
 import { formatPrice, getFinalPrice, hasDiscount, toFaDigits } from '@/data/products';
 
 export default function ProductCard({ product }) {
   const discounted = hasDiscount(product);
   const finalPrice = getFinalPrice(product);
+  const madeToOrder = isMadeToOrder(product);
 
   return (
     <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-ink-soft/70 transition duration-500 hover:-translate-y-1.5 hover:border-gold/40 hover:shadow-gold">
-      <Link
-        href={`/products/${product.slug}`}
-        className="flex flex-1 flex-col"
-        aria-label={`مشاهده جزئیات ${product.name}`}
-      >
-        <div className="relative">
+      <div className="relative">
+        <Link
+          href={`/products/${product.slug}`}
+          tabIndex={-1}
+          aria-hidden="true"
+          className="block"
+        >
           <ProductImage src={product.image} alt={product.name} boxHeightClass="h-72" />
           <div
             aria-hidden="true"
@@ -30,8 +34,25 @@ export default function ProductCard({ product }) {
           <span className="absolute end-4 top-4 rounded-full border border-gold/30 bg-ink/70 px-3 py-1 text-[10px] tracking-wide text-gold backdrop-blur-sm">
             عیار {toFaDigits(product.karat)}
           </span>
-        </div>
+        </Link>
 
+        <WishlistButton
+          productId={product.id}
+          className="absolute bottom-4 end-4 z-10"
+        />
+
+        {madeToOrder ? (
+          <span className="absolute bottom-4 start-4 z-10 rounded-full border border-gold/25 bg-ink/75 px-2.5 py-1 text-[9px] tracking-wide text-champagne/65 backdrop-blur-sm">
+            سفارش ساخت
+          </span>
+        ) : null}
+      </div>
+
+      <Link
+        href={`/products/${product.slug}`}
+        className="flex flex-1 flex-col"
+        aria-label={`مشاهده جزئیات ${product.name}`}
+      >
         <div className="flex flex-1 flex-col gap-5 p-5">
           <div>
             <p className="text-[10px] tracking-[0.28em] text-champagne/40">{product.category}</p>

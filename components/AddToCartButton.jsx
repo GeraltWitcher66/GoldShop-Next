@@ -2,13 +2,13 @@
 
 import { useCart } from '@/context/CartContext';
 
-export default function AddToCartButton({ product }) {
+export default function AddToCartButton({ product, optionLabel, optionValue }) {
   const { addItem } = useCart();
 
   return (
     <button
       type="button"
-      onClick={() => addItem(product)}
+      onClick={() => addItem(product, { optionLabel, optionValue })}
       className="btn-gold flex-1 shadow-[0_0_22px_rgba(212,175,55,0.45)] transition-shadow hover:shadow-[0_0_32px_rgba(212,175,55,0.55)] sm:flex-none"
     >
       <svg

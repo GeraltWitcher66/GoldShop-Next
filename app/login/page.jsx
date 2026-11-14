@@ -1,16 +1,19 @@
 import Link from 'next/link';
 
 import LoginForm from '@/components/LoginForm';
+import { absoluteUrl } from '@/lib/site';
 
 export const metadata = {
   title: 'ورود و ثبت‌نام | گالری زرین',
   description:
     'ورود به حساب کاربری یا ثبت‌نام در گالری زرین؛ پیگیری سفارش‌ها و اطلاع از کالکشن‌های جدید طلا و جواهر دست‌ساز.',
+  alternates: { canonical: absoluteUrl('/login/') },
+  robots: { index: false, follow: true },
 };
 
 export default function LoginPage() {
   return (
-    <main className="relative flex min-h-[100svh] flex-col overflow-x-hidden bg-[#08080a]">
+    <main id="main-content" className="relative flex min-h-[100svh] flex-col overflow-x-hidden bg-[#08080a]">
       {/* پس‌زمینهٔ تاریک با بافت و هالهٔ طلایی */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         <div className="luxe-grid absolute inset-0 opacity-40" />

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 import ProductImage from '@/components/ProductImage';
 import { useCart } from '@/context/CartContext';
@@ -17,23 +17,50 @@ export default function CartSidebar() {
     removeItem,
     updateQty,
     clearCart,
-    submitOrder,
   } = useCart();
+
+  const dialogRef = useRef(null);
+  const closeButtonRef = useRef(null);
 
   useEffect(() => {
     if (!isOpen) return undefined;
 
+    const previouslyFocused = document.activeElement;
     const handleKeyDown = (event) => {
-      if (event.key === 'Escape') closeCart();
+      if (event.key === 'Escape') {
+        closeCart();
+        return;
+      }
+
+      if (event.key !== 'Tab') return;
+
+      const focusable = dialogRef.current?.querySelectorAll(
+        'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+
+      if (!focusable?.length) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     document.addEventListener('keydown', handleKeyDown);
+    closeButtonRef.current?.focus();
 
     return () => {
       document.body.style.overflow = previousOverflow;
       document.removeEventListener('keydown', handleKeyDown);
+      previouslyFocused?.focus?.();
     };
   }, [isOpen, closeCart]);
 
@@ -49,7 +76,10 @@ export default function CartSidebar() {
         className="absolute inset-0 h-full w-full cursor-default bg-black/70 backdrop-blur-sm"
       />
 
-      <aside className="absolute inset-y-0 end-0 flex w-full max-w-md animate-cart-in flex-col border-s border-gold/15 bg-ink-soft/95 shadow-[0_0_80px_rgba(0,0,0,0.9)] backdrop-blur-2xl">
+      <aside
+        ref={dialogRef}
+        className="absolute inset-y-0 end-0 flex w-full max-w-md animate-cart-in flex-col border-s border-gold/15 bg-ink-soft/95 shadow-[0_0_80px_rgba(0,0,0,0.9)] backdrop-blur-2xl"
+      >
         <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
           <div>
             <h2 id="cart-title" className="text-base font-medium text-champagne">
@@ -61,6 +91,7 @@ export default function CartSidebar() {
           </div>
 
           <button
+            ref={closeButtonRef}
             type="button"
             onClick={closeCart}
             aria-label="بستن"
@@ -82,7 +113,7 @@ export default function CartSidebar() {
             </span>
             <p className="text-sm text-champagne/60">هنوز قطعه‌ای به سبد اضافه نکرده‌اید.</p>
             <Link
-              href="/#collection"
+              href="/collections/"
               onClick={closeCart}
               className="inline-flex items-center justify-center rounded-full border border-white/15 px-5 py-2.5 text-xs text-champagne/70 transition hover:border-gold/50 hover:text-gold"
             >
@@ -93,7 +124,7 @@ export default function CartSidebar() {
           <ul className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
             {items.map((item) => (
               <li
-                key={item.id}
+                key={item.key}
                 className="flex gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3"
               >
                 <Link
@@ -116,7 +147,7 @@ export default function CartSidebar() {
                     </Link>
                     <button
                       type="button"
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => removeItem(item.key)}
                       aria-label={`حذف ${item.name} از سبد`}
                       className="shrink-0 text-champagne/30 transition hover:text-gold"
                     >
@@ -126,13 +157,18 @@ export default function CartSidebar() {
                     </button>
                   </div>
 
-                  <p className="mt-1 text-[10px] text-champagne/40">عیار {toFaDigits(item.karat)}</p>
+                  <p className="mt-1 text-[10px] text-champagne/40">
+                    عیار {toFaDigits(item.karat)}
+                    {item.optionLabel && item.optionValue
+                      ? ` · ${item.optionLabel} ${item.optionValue}`
+                      : ''}
+                  </p>
 
                   <div className="mt-2 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1 rounded-full border border-white/10">
                       <button
                         type="button"
-                        onClick={() => updateQty(item.id, -1)}
+                        onClick={() => updateQty(item.key, -1)}
                         aria-label="کاهش تعداد"
                         className="grid h-6 w-6 place-items-center rounded-full text-champagne/60 transition hover:text-gold"
                       >
@@ -143,7 +179,7 @@ export default function CartSidebar() {
                       </span>
                       <button
                         type="button"
-                        onClick={() => updateQty(item.id, 1)}
+                        onClick={() => updateQty(item.key, 1)}
                         aria-label="افزایش تعداد"
                         className="grid h-6 w-6 place-items-center rounded-full text-champagne/60 transition hover:text-gold"
                       >
@@ -176,9 +212,9 @@ export default function CartSidebar() {
               ارسال بیمه‌شده و بسته‌بندی هدیه، رایگان است.
             </p>
 
-            <button type="button" onClick={submitOrder} className="btn-gold mt-4 w-full">
-              ثبت سفارش
-            </button>
+            <Link href="/checkout/" onClick={closeCart} className="btn-gold mt-4 w-full">
+              ادامه و تسویه حساب
+            </Link>
 
             <button
               type="button"

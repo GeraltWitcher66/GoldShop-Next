@@ -6,6 +6,7 @@ import Header from '@/components/Header';
 import ProductCard from '@/components/ProductCard';
 import { categories, getCategory } from '@/data/categories';
 import { products, toFaDigits } from '@/data/products';
+import { absoluteUrl } from '@/lib/site';
 
 export function generateStaticParams() {
   return categories.map((category) => ({ slug: category.slug }));
@@ -18,9 +19,18 @@ export function generateMetadata({ params }) {
     return { title: 'دسته‌بندی یافت نشد | گالری زرین' };
   }
 
+  const url = absoluteUrl(`/category/${category.slug}/`);
+
   return {
     title: `${category.title} | گالری زرین`,
     description: `${category.title} گالری زرین؛ طلا و جواهر دست‌ساز با عیار ۱۸ و ۲۱، شناسنامه اصالت و ارسال بیمه‌شده.`,
+    alternates: { canonical: url },
+    openGraph: {
+      title: category.title,
+      description: `${category.title} دست‌ساز گالری زرین`,
+      url,
+      ...(category.image ? { images: [{ url: absoluteUrl(category.image) }] } : {}),
+    },
   };
 }
 
@@ -37,7 +47,7 @@ export default function CategoryPage({ params }) {
     <>
       <Header />
 
-      <main className="relative pb-24 pt-32">
+      <main id="main-content" className="relative pb-24 pt-32">
         <div
           aria-hidden="true"
           className="luxe-grid pointer-events-none absolute inset-x-0 top-0 h-[420px] opacity-50"

@@ -13,6 +13,10 @@ function getProductPrice(product) {
   return Math.round(product.price * (1 - percent / 100));
 }
 
+function buildKey(id, optionValue) {
+  return `${id}__${optionValue || 'default'}`;
+}
+
 function sanitizeItem(item) {
   if (!item || typeof item.id !== 'string') return null;
   if (!Number.isFinite(item.price) || item.price <= 0) return null;
@@ -20,7 +24,11 @@ function sanitizeItem(item) {
   const qty = Number.isFinite(item.qty) ? Math.floor(item.qty) : 1;
   if (qty < 1) return null;
 
+  const optionValue = typeof item.optionValue === 'string' ? item.optionValue : '';
+  const optionLabel = typeof item.optionLabel === 'string' ? item.optionLabel : '';
+
   return {
+    key: typeof item.key === 'string' && item.key ? item.key : buildKey(item.id, optionValue),
     id: item.id,
     slug: typeof item.slug === 'string' ? item.slug : '',
     name: typeof item.name === 'string' ? item.name : '',
@@ -28,6 +36,8 @@ function sanitizeItem(item) {
     karat: Number.isFinite(item.karat) ? item.karat : 18,
     price: item.price,
     qty: Math.min(qty, MAX_QTY),
+    optionLabel,
+    optionValue,
   };
 }
 
@@ -63,19 +73,24 @@ export function CartProvider({ children }) {
     }
   }, [items, isHydrated]);
 
-  const addItem = useCallback((product) => {
+  const addItem = useCallback((product, options = {}) => {
+    const optionValue = options.optionValue || '';
+    const optionLabel = options.optionLabel || '';
+    const key = buildKey(product.id, optionValue);
+
     setItems((previous) => {
-      const existing = previous.find((item) => item.id === product.id);
+      const existing = previous.find((item) => item.key === key);
 
       if (existing) {
         return previous.map((item) =>
-          item.id === product.id ? { ...item, qty: Math.min(item.qty + 1, MAX_QTY) } : item
+          item.key === key ? { ...item, qty: Math.min(item.qty + 1, MAX_QTY) } : item
         );
       }
 
       return [
         ...previous,
         {
+          key,
           id: product.id,
           slug: product.slug,
           name: product.name,
@@ -83,6 +98,8 @@ export function CartProvider({ children }) {
           karat: product.karat,
           price: getProductPrice(product),
           qty: 1,
+          optionLabel,
+          optionValue,
         },
       ];
     });
@@ -90,14 +107,14 @@ export function CartProvider({ children }) {
     setIsOpen(true);
   }, []);
 
-  const removeItem = useCallback((id) => {
-    setItems((previous) => previous.filter((item) => item.id !== id));
+  const removeItem = useCallback((key) => {
+    setItems((previous) => previous.filter((item) => item.key !== key));
   }, []);
 
-  const updateQty = useCallback((id, delta) => {
+  const updateQty = useCallback((key, delta) => {
     setItems((previous) =>
       previous.map((item) =>
-        item.id === id
+        item.key === key
           ? { ...item, qty: Math.min(MAX_QTY, Math.max(1, item.qty + delta)) }
           : item
       )
@@ -113,13 +130,7 @@ export function CartProvider({ children }) {
     setToast({ id: Date.now(), text });
   }, []);
 
-  const submitOrder = useCallback(() => {
-    setItems([]);
-    setIsOpen(false);
-    showToast('سفارش شما ثبت شد. برای هماهنگی با شما تماس می‌گیریم.');
-  }, [showToast]);
-
-  // بستن خودکار پیام موفقیت
+  // بستن خودکار پیام
   useEffect(() => {
     if (!toast) return undefined;
     const timer = window.setTimeout(() => setToast(null), 6500);
@@ -138,30 +149,32 @@ export function CartProvider({ children }) {
       count,
       total,
       isOpen,
+      isHydrated,
       toast,
       addItem,
       removeItem,
       updateQty,
       clearCart,
-      submitOrder,
       openCart,
       closeCart,
       dismissToast,
+      showToast,
     }),
     [
       items,
       count,
       total,
       isOpen,
+      isHydrated,
       toast,
       addItem,
       removeItem,
       updateQty,
       clearCart,
-      submitOrder,
       openCart,
       closeCart,
       dismissToast,
+      showToast,
     ]
   );
 

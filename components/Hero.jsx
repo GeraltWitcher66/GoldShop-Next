@@ -1,5 +1,4 @@
 import ProductImage from '@/components/ProductImage';
-import { asset } from '@/lib/path';
 
 const TRUST_ITEMS = [
   'ضمانت اصالت و عیار رسمی',
@@ -12,10 +11,7 @@ export default function Hero() {
     <section id="home" className="relative isolate flex min-h-[100svh] flex-col overflow-hidden">
       {/* پس‌زمینه: تصویر + گرادیان‌های تیره */}
       <div aria-hidden="true" className="absolute inset-0 -z-10">
-        <div
-          className="absolute inset-0 bg-ink bg-cover bg-center"
-          style={{ backgroundImage: `url('${asset('/images/hero-bg.jpg')}')` }}
-        />
+        <div className="absolute inset-0 bg-ink" />
         <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/80 to-ink/40" />
         {/* یکپارچه‌کردن بالای هیرو با هدر ثابت */}
         <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-ink/75 via-ink/25 to-transparent" />

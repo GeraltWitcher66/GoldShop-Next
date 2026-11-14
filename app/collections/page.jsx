@@ -1,12 +1,15 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
 
+import CollectionsBrowser from '@/components/CollectionsBrowser';
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
-import ProductGrid from '@/components/ProductGrid';
+import { absoluteUrl } from '@/lib/site';
 
 export const metadata = {
   title: 'کالکشن | گالری زرین',
   description: 'همه قطعه‌های گالری زرین؛ طلا و جواهر دست‌ساز با عیار ۱۸ و ۲۱ و شناسنامه اصالت.',
+  alternates: { canonical: absoluteUrl('/collections/') },
 };
 
 export default function CollectionsPage() {
@@ -14,7 +17,7 @@ export default function CollectionsPage() {
     <>
       <Header />
 
-      <main className="relative pb-24 pt-32">
+      <main id="main-content" className="relative pb-24 pt-32">
         <div
           aria-hidden="true"
           className="luxe-grid pointer-events-none absolute inset-x-0 top-0 h-[420px] opacity-50"
@@ -41,7 +44,13 @@ export default function CollectionsPage() {
             همراه است.
           </p>
 
-          <ProductGrid />
+          <Suspense
+            fallback={
+              <div className="mt-12 h-64 animate-pulse rounded-2xl border border-white/5 bg-white/[0.02]" />
+            }
+          >
+            <CollectionsBrowser />
+          </Suspense>
         </div>
       </main>
 
